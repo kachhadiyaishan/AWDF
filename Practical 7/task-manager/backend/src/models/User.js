@@ -1,0 +1,2 @@
+import mongoose from 'mongoose';
+const schema=new mongoose.Schema({name:{type:String,required:true,trim:true,maxlength:80},email:{type:String,required:true,unique:true,lowercase:true,trim:true,match:[/^\S+@\S+\.\S+$/,'Enter a valid email address.']},password:{type:String,required:true,select:false}},{timestamps:true,versionKey:false});schema.set('toJSON',{transform(doc,ret){delete ret.password;delete ret.__v;return ret}});export default mongoose.model('User',schema);
