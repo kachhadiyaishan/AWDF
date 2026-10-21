@@ -1,0 +1,1 @@
+{"name":"awdf-assignment-7-ai-design-api","version":"1.0.0","private":true,"type":"module","scripts":{"start":"node src/server.js","dev":"node --watch src/server.js"},"dependencies":{"cors":"^2.8.5","dotenv":"^16.4.7","express":"^4.21.2","openai":"^4.77.0"},"engines":{"node":">=18"}}
