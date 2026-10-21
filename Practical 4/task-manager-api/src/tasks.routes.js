@@ -1,0 +1,16 @@
+import { Router } from 'express';
+import { randomUUID } from 'node:crypto';
+const router=Router();
+let tasks=[
+{id:'task-101',title:'Review React components',description:'Check props and reusable UI structure.',completed:true,createdAt:'2026-01-10T09:00:00.000Z'},
+{id:'task-102',title:'Practice REST endpoints',description:'Test CRUD operations with an API client.',completed:false,createdAt:'2026-01-11T09:00:00.000Z'},
+{id:'task-103',title:'Write practical reflection',description:'Document implementation decisions and errors.',completed:false,createdAt:'2026-01-12T09:00:00.000Z'}
+];
+function validateTaskId(req,res,next){const id=req.params.id;if(!/^(task-[a-zA-Z0-9-]+|[0-9a-fA-F-]{36})$/.test(id))return res.status(400).json({error:{code:'INVALID_TASK_ID',message:'Task ID format is invalid.'}});next()}
+function validateTaskBody(req,res,next){const {title,description,completed}=req.body??{};if(typeof title!=='string'||!title.trim())return res.status(400).json({error:{code:'VALIDATION_ERROR',message:'A non-empty title is required.'}});if(description!==undefined&&typeof description!=='string')return res.status(400).json({error:{code:'VALIDATION_ERROR',message:'Description must be a string.'}});if(completed!==undefined&&typeof completed!=='boolean')return res.status(400).json({error:{code:'VALIDATION_ERROR',message:'Completed must be a boolean.'}});next()}
+router.get('/',(req,res)=>{const {completed,q}=req.query;let result=[...tasks];if(completed==='true'||completed==='false')result=result.filter(t=>t.completed===(completed==='true'));if(typeof q==='string'&&q.trim())result=result.filter(t=>`${t.title} ${t.description}`.toLowerCase().includes(q.trim().toLowerCase()));res.status(200).json({data:result,meta:{count:result.length}})});
+router.get('/:id',validateTaskId,(req,res)=>{const task=tasks.find(t=>t.id===req.params.id);if(!task)return res.status(404).json({error:{code:'TASK_NOT_FOUND',message:`No task found with id ${req.params.id}.`}});res.status(200).json({data:task})});
+router.post('/',validateTaskBody,(req,res)=>{const task={id:`task-${randomUUID()}`,title:req.body.title.trim(),description:(req.body.description??'').trim(),completed:req.body.completed??false,createdAt:new Date().toISOString()};tasks=[task,...tasks];res.location(`/tasks/${task.id}`).status(201).json({data:task})});
+router.put('/:id',validateTaskId,validateTaskBody,(req,res)=>{const current=tasks.find(t=>t.id===req.params.id);if(!current)return res.status(404).json({error:{code:'TASK_NOT_FOUND',message:`No task found with id ${req.params.id}.`}});const updated={...current,title:req.body.title.trim(),description:req.body.description===undefined?current.description:req.body.description.trim(),completed:req.body.completed===undefined?current.completed:req.body.completed};tasks=tasks.map(t=>t.id===updated.id?updated:t);res.status(200).json({data:updated})});
+router.delete('/:id',validateTaskId,(req,res)=>{const task=tasks.find(t=>t.id===req.params.id);if(!task)return res.status(404).json({error:{code:'TASK_NOT_FOUND',message:`No task found with id ${req.params.id}.`}});tasks=tasks.filter(t=>t.id!==req.params.id);res.status(200).json({data:task,message:'Task deleted successfully.'})});
+export default router;
