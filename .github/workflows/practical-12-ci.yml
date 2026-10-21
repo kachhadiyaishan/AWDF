@@ -1,0 +1,31 @@
+name: Practical 12 CI
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Practical 12/**'
+      - '.github/workflows/practical-12-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Practical 12/**'
+      - '.github/workflows/practical-12-ci.yml'
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Practical 12
+    env:
+      NODE_OPTIONS: --experimental-vm-modules
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Run automated tests
+        run: npm test
