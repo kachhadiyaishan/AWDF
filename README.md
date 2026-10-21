@@ -116,6 +116,14 @@ Use the commands in the project's README. For Docker projects, ensure Docker Eng
 - Treat AI-generated code and design suggestions as drafts. Review correctness, privacy, usability, and accessibility before applying them.
 - Use development certificates only for local testing; public deployments need an appropriate trusted TLS configuration.
 
+## Repository maintenance
+
+- [Contributing guidelines](./CONTRIBUTING.md) explain the expected workflow for focused changes and pull requests.
+- [Security policy](./SECURITY.md) describes safe vulnerability reporting and project-specific security precautions.
+- The root [.gitignore](./.gitignore) excludes common local secrets, dependency folders, build output, and editor files while allowing example environment files.
+- GitHub Actions runs a repository secret scan, and Dependabot checks GitHub Actions dependencies weekly.
+- Use the GitHub issue templates to report reproducible bugs or suggest focused improvements.
+
 ## Evidence and testing notes
 
 This repository is intended to be reproducible and reviewable. Some practicals ask students to record timings, inspect browser network activity, run Docker resource commands, or capture screenshots. Such evidence should be collected from the actual environment used for the exercise. Documentation templates and checklists are not substitutes for measured results.
