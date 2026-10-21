@@ -1,0 +1,1 @@
+{"name":"task-manager-api-practical-4","version":"1.0.0","private":true,"description":"Express REST API with CRUD and middleware for AWDF Practical 4","type":"module","scripts":{"start":"node src/server.js","dev":"node --watch src/server.js"},"dependencies":{"express":"^4.21.2"},"engines":{"node":">=18"}}
