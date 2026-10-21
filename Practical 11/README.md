@@ -1,0 +1,2 @@
+# Practical 11 — Docker and Docker Compose
+Self-contained React + Express + MongoDB starter. Start the whole stack with `docker compose up --build`. Frontend: http://localhost:5173; API health: http://localhost:5000/health. Stop with Ctrl+C and `docker compose down`. MongoDB uses a named persistent volume. Backend connection uses service DNS `mongodb`, never localhost. Frontend uses a multi-stage build and Nginx. Requires Docker Engine/Desktop with Compose.

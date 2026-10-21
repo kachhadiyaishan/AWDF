@@ -1,0 +1,1 @@
+export default function Projects(){return <><small>WORKSPACE / PROJECTS</small><h1>Projects</h1><p>Loaded only when the /projects route is visited.</p>{[['Task Management API','Express + MongoDB'],['Taskflow UI','React + Vite'],['Performance Lab','Code splitting']].map(([a,b])=><article className="item" key={a}><b>{a}</b><span>{b}</span></article>)}</>}

@@ -1,0 +1,2 @@
+# Practical 10 — Event-Driven Architecture
+Express/Mongoose uses Node's built-in EventEmitter for `task-created` and `task-deleted` notifications. A two-second listener delay makes the separation visible. Run `npm install`, configure `.env`, then `npm run dev`. POST `/tasks` with `{"title":"Review practical","assignedUser":"student"}`; watch `[API]` and `[Notification]` timestamps. EventEmitter is a lightweight single-process demonstration, not a durable distributed queue.

@@ -1,0 +1,1 @@
+export default function Contact(){return <><small>WORKSPACE / CONTACT</small><h1>Let's talk.</h1><p>This contact page is another independently lazy-loaded route.</p><article className="item"><b>AWDF Lab Support</b><span>Review your build output and real DevTools readings before submission.</span><a href="mailto:lab@example.com">lab@example.com ↗</a></article></>}
