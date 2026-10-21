@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest a focused improvement to the coursework repository.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: input
+    id: area
+    attributes:
+      label: Relevant practical or assignment
+      placeholder: "Practical 12"
+    validations:
+      required: false
+  - type: textarea
+    id: goal
+    attributes:
+      label: What would you like to improve?
+      description: Explain the problem or learning goal.
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: Suggested approach
+      description: Describe a possible solution, if you have one.
+    validations:
+      required: false

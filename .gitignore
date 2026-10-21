@@ -1,0 +1,47 @@
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Node.js dependencies and build output
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+coverage/
+**/coverage/
+
+# Logs and runtime files
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.pid
+*.seed
+*.pid.lock
+
+# Local databases, uploads, and temporary files
+*.sqlite
+*.sqlite3
+*.db-journal
+uploads/
+tmp/
+temp/
+
+# TLS certificates and private keys
+*.key
+*.pem
+*.p12
+*.pfx
+!**/certs/README.md
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
