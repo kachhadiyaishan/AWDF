@@ -1,2 +1,0 @@
-# Evidence folder
-After running the assignment on your own machine, capture the real output of `docker stats` and save the screenshot here as `docker-stats.png`. Update CLOUD.md to embed it. Do not commit secrets or fabricated benchmark/evidence screenshots.
