@@ -1,19 +1,28 @@
-# Practical 4 — Task Manager REST API
+# Practical 4 — Task Manager REST API + Web UI
 
-A Node.js + Express REST API implementing in-memory task CRUD, request logging, JSON validation, route-specific ID validation, structured 404 responses, and centralized error handling.
+A runnable Express task manager demonstrating in-memory CRUD, request logging, JSON validation, route-specific ID validation, structured 404 responses, centralized error handling, and a responsive HTML/CSS/JavaScript interface.
 
-## Routes
-- `GET /tasks` — list tasks (200), optional `?completed=true` and `?q=...`.
-- `GET /tasks/:id` — retrieve one task (200 or 404).
-- `POST /tasks` — create a task (201; JSON content type and title required).
-- `PUT /tasks/:id` — update a task (200 or 400/404).
-- `DELETE /tasks/:id` — delete a task (200 or 404).
-- `GET /health` — health check (200).
+## Run locally
 
-## Run
+Requirements: Node.js 18 or newer.
+
 ```bash
 cd "Practical 4/task-manager-api"
 npm install
 npm run dev
 ```
-Server: http://localhost:5000. Test with Postman, Thunder Client, or curl. Data is in memory and resets when the server restarts.
+
+Open **http://localhost:5000**. The API and static frontend are served from the same process, so no separate frontend server or CORS setup is required. Use **http://localhost:5000/health** to check server status.
+
+## API routes
+
+- `GET /tasks` — list tasks; supports `?completed=true` and `?q=...`.
+- `GET /tasks/:id` — retrieve a task.
+- `POST /tasks` — create a task (JSON body with a non-empty `title`).
+- `PUT /tasks/:id` — update a task.
+- `DELETE /tasks/:id` — delete a task.
+- `GET /health` — health check.
+
+## Notes
+
+Tasks are stored in memory and reset when the server restarts. This practical is self-contained; it does not require MongoDB or API keys. Test API routes with the included browser UI, Postman, Thunder Client, or curl.
