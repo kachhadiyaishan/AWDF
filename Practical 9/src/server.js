@@ -1,1 +1,61 @@
-import'dotenv/config';import express from'express';import mongoose from'mongoose';import NodeCache from'node-cache';const app=express(),cache=new NodeCache({stdTTL:Math.max(1,Number(process.env.CACHE_TTL_SECONDS)||60)}),metrics={hits:0,misses:0};app.use(express.json({limit:'32kb'}));const Task=mongoose.model('Task',new mongoose.Schema({title:{type:String,required:true,trim:true},description:{type:String,default:''},completed:{type:Boolean,default:false},priority:{type:String,enum:['low','medium','high'],default:'medium'}},{timestamps:true}));const wrap=fn=>(req,res,next)=>Promise.resolve(fn(req,res,next)).catch(next);function invalidate(id){cache.del('all_tasks');if(id)cache.del('task:'+id)}app.get('/health',(req,res)=>res.json({status:'ok'}));app.get('/debug/cache',(req,res)=>res.json({...metrics,keys:cache.keys(),ttlSeconds:Number(process.env.CACHE_TTL_SECONDS)||60}));app.get('/tasks',wrap(async(req,res)=>{const hit=cache.get('all_tasks');if(hit){metrics.hits++;res.set('X-Cache','HIT');return res.json({data:hit})}metrics.misses++;const data=await Task.find().sort({createdAt:-1}).lean();cache.set('all_tasks',data);res.set('X-Cache','MISS');res.json({data})}));app.get('/tasks/:id',wrap(async(req,res)=>{const key='task:'+req.params.id,hit=cache.get(key);if(hit){metrics.hits++;res.set('X-Cache','HIT');return res.json({data:hit})}metrics.misses++;const data=await Task.findById(req.params.id).lean();if(!data)return res.status(404).json({message:'Not found'});cache.set(key,data);res.set('X-Cache','MISS');res.json({data})}));app.post('/tasks',wrap(async(req,res)=>{if(!req.body?.title?.trim())return res.status(400).json({message:'Title required'});const data=await Task.create({title:req.body.title.trim(),description:req.body.description||'',priority:req.body.priority||'medium'});invalidate(data.id);res.status(201).json({data})}));app.put('/tasks/:id',wrap(async(req,res)=>{if(!req.body?.title?.trim())return res.status(400).json({message:'Title required'});const data=await Task.findByIdAndUpdate(req.params.id,{title:req.body.title.trim(),description:req.body.description||'',completed:Boolean(req.body.completed),priority:req.body.priority||'medium'},{new:true,runValidators:true});if(!data)return res.status(404).json({message:'Not found'});invalidate(data.id);res.json({data})}));app.delete('/tasks/:id',wrap(async(req,res)=>{const data=await Task.findByIdAndDelete(req.params.id);if(!data)return res.status(404).json({message:'Not found'});invalidate(req.params.id);res.status(204).end()}));app.use((e,req,res,next)=>{console.error(e);res.status(500).json({message:'Server error'})});if(process.env.NODE_ENV!=='test')mongoose.connect(process.env.MONGO_URI||'mongodb://127.0.0.1:27017/awdf_practical9').then(()=>app.listen(Number(process.env.PORT)||5000,()=>console.log('Cache API ready'))).catch(e=>{console.error(e);process.exit(1)});export default app;
+import 'dotenv/config';
+import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import mongoose from 'mongoose';
+import NodeCache from 'node-cache';
+
+const app = express();
+const PORT = Number(process.env.PORT) || 5000;
+const cache = new NodeCache({ stdTTL: Math.max(1, Number(process.env.CACHE_TTL_SECONDS) || 60) });
+const metrics = { hits: 0, misses: 0 };
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+app.use(express.json({ limit: '32kb' }));
+const Task = mongoose.models.Task || mongoose.model('Task', new mongoose.Schema({
+  title: { type: String, required: true, trim: true },
+  description: { type: String, default: '' },
+  completed: { type: Boolean, default: false },
+  priority: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' }
+}, { timestamps: true }));
+const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+function invalidate(id) { cache.del('all_tasks'); if (id) cache.del('task:' + id); }
+app.get('/health', (req, res) => res.json({ status: 'ok', database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' }));
+app.get('/debug/cache', (req, res) => res.json({ ...metrics, keys: cache.keys(), ttlSeconds: Number(process.env.CACHE_TTL_SECONDS) || 60 }));
+app.get('/tasks', wrap(async (req, res) => {
+  const hit = cache.get('all_tasks');
+  if (hit) { metrics.hits++; res.set('X-Cache', 'HIT'); return res.json({ data: hit }); }
+  metrics.misses++;
+  const data = await Task.find().sort({ createdAt: -1 }).lean();
+  cache.set('all_tasks', data); res.set('X-Cache', 'MISS'); res.json({ data });
+}));
+app.get('/tasks/:id', wrap(async (req, res) => {
+  const key = 'task:' + req.params.id, hit = cache.get(key);
+  if (hit) { metrics.hits++; res.set('X-Cache', 'HIT'); return res.json({ data: hit }); }
+  metrics.misses++;
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid task id' });
+  const data = await Task.findById(req.params.id).lean();
+  if (!data) return res.status(404).json({ message: 'Not found' });
+  cache.set(key, data); res.set('X-Cache', 'MISS'); res.json({ data });
+}));
+app.post('/tasks', wrap(async (req, res) => {
+  if (typeof req.body?.title !== 'string' || !req.body.title.trim()) return res.status(400).json({ message: 'Title required' });
+  const data = await Task.create({ title: req.body.title.trim(), description: req.body.description || '', priority: req.body.priority || 'medium' });
+  invalidate(data.id); res.status(201).json({ data });
+}));
+app.put('/tasks/:id', wrap(async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid task id' });
+  if (typeof req.body?.title !== 'string' || !req.body.title.trim()) return res.status(400).json({ message: 'Title required' });
+  const data = await Task.findByIdAndUpdate(req.params.id, { title: req.body.title.trim(), description: req.body.description || '', completed: Boolean(req.body.completed), priority: req.body.priority || 'medium' }, { new: true, runValidators: true });
+  if (!data) return res.status(404).json({ message: 'Not found' });
+  invalidate(data.id); res.json({ data });
+}));
+app.delete('/tasks/:id', wrap(async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid task id' });
+  const data = await Task.findByIdAndDelete(req.params.id);
+  if (!data) return res.status(404).json({ message: 'Not found' });
+  invalidate(req.params.id); res.status(204).end();
+}));
+app.use(express.static(path.resolve(__dirname, '../public')));
+app.use((err, req, res, next) => { console.error(err); res.status(500).json({ message: 'Server error' }); });
+if (process.env.NODE_ENV !== 'test') mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/awdf_practical9').then(() => app.listen(PORT, () => console.log('Cache API + UI listening at http://localhost:' + PORT))).catch(err => { console.error('MongoDB connection failed:', err.message); process.exit(1); });
+export default app;
